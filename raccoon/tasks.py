@@ -1,6 +1,16 @@
 from collections import defaultdict
 
-from raccoon import RESULT_QUEUE
+from raccoon import RESULTS_QUEUE
+
+
+class BaseTask(object):
+
+    @classmethod
+    def get_instances(cls):
+        raise NotImplementedError
+
+    def run(self):
+        raise NotImplementedError
 
 
 class KeepRefs(object):
@@ -15,18 +25,19 @@ class KeepRefs(object):
             yield inst_ref
 
 
-class task(KeepRefs):
+class task(KeepRefs, BaseTask):
+    __slots__ = ('name', 'wrapper', 'results_queue')
 
     def __init__(self, *args, **kwargs):
         super(task, self).__init__()
         self.name = kwargs.get('name')
+        self.results_queue = RESULTS_QUEUE
 
     def __call__(self, fn):
         def call_fn(*args, **kwargs):
-            print "BEFORE!"
             result = fn(*args, **kwargs)
-            RESULT_QUEUE.put(result)
-            print "AFTER!"
-    
-        self.run = call_fn
-        # return call_fn
+            self.results_queue.put(result)
+        self.wrapper = call_fn
+
+    def run(self, *args, **kwargs):
+        self.wrapper(*args, **kwargs)
