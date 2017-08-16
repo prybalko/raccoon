@@ -22,6 +22,3 @@ def tasks():
         response = submit_new_task(**data)
         return response
     return "list"
-
-
-

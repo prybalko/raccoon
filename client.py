@@ -1,8 +1,16 @@
-from raccoon import task
+from raccoon import task, BaseTask
 import time
 
 
 @task(name='make_report')
 def make_report(num):
-    time.sleep(3)
+    time.sleep(2)
     return "CALLING make_report function with arg {}".format(num)
+
+
+class MakeReport(BaseTask):
+    name = 'make_class_report'
+
+    def run(params):
+        time.sleep(3)
+        print "Calling MakeReport class run method with arg {}".format(params)
