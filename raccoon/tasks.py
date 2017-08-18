@@ -9,7 +9,7 @@ class AbstractTask(object):
     def get_instances(cls):
         raise NotImplementedError
 
-    def run(self):
+    def _run(self, *args, **kwargs):
         raise NotImplementedError
 
 
@@ -28,16 +28,26 @@ class task(AbstractTask):
             self.results_queue.put(result)
         self.wrapper = call_fn
 
-    def run(self, *args, **kwargs):
+    def _run(self, *args, **kwargs):
         self.wrapper(*args, **kwargs)
 
     @classmethod
     def get_instances(cls):
-        return cls.__refs__[cls]
+        for instance in cls.__refs__[cls]:
+            yield instance
 
 
 class BaseTask(AbstractTask):
+    __slots__ = ('results_queue',)
+
+    def __init__(self, *args, **kwargs):
+        self.results_queue = RESULTS_QUEUE
 
     @classmethod
     def get_instances(cls):
-        return cls.__subclasses__()
+        for subclass in cls.__subclasses__():
+            yield subclass()
+
+    def _run(self, *args, **kwargs):
+        result = self.run(*args, **kwargs)
+        self.results_queue.put(result)

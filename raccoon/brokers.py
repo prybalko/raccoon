@@ -25,7 +25,7 @@ class Broker(object):
             if not task_queue.empty():
                 task = self.tasks[task_name]
                 kwargs = task_queue.get()
-                mp.Process(target=task.run, kwargs=kwargs).start()
+                mp.Process(target=task._run, kwargs=kwargs).start()
 
     def _proceed_result_if_any(self):
         if not self.result_queue.empty():

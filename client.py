@@ -11,6 +11,6 @@ def make_report(num):
 class MakeReport(BaseTask):
     name = 'make_class_report'
 
-    def run(params):
+    def run(self, num):
         time.sleep(3)
-        print "Calling MakeReport class run method with arg {}".format(params)
+        return "Calling MakeReport class run method with arg {}".format(num)
