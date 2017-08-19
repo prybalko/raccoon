@@ -14,12 +14,13 @@ class AbstractTask(object):
 
 
 class task(AbstractTask):
-    __slots__ = ('name', 'wrapper', 'results_queue')
+    __slots__ = ('name', 'wrapper', 'results_queue', 'json_schema')
     __refs__ = defaultdict(list)
 
     def __init__(self, *args, **kwargs):
         self.__refs__[self.__class__].append(self)
         self.name = kwargs.get('name')
+        self.json_schema = kwargs.get('json_schema')
         self.results_queue = RESULTS_QUEUE
 
     def __call__(self, fn):

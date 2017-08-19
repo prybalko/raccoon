@@ -15,10 +15,6 @@ def home():
 @app.route("/api/tasks/", methods=['GET', 'POST'])
 def tasks():
     if request.method == 'POST':
-        try:
-            data = json.loads(request.data)
-        except ValueError:
-            abort(400)
-        response = submit_new_task(**data)
-        return response
+        response = submit_new_task(request.data)
+        return json.dumps(response)
     return "list"
