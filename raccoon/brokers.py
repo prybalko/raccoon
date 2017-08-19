@@ -17,7 +17,7 @@ class Broker(object):
         self.run()
 
     def run(self):
-        print "RUNNING..."
+        print "Broker is running..."
         while True:
             self._maybe_start_new_worker()
             self._proceed_result_if_any()
@@ -34,11 +34,14 @@ class Broker(object):
         if not self.result_queue.empty():
             response = self.result_queue.get()
             self._send_email_with_response(**response)
-            result, email = response['result'], response['email']
-            print 'Sending mail to {} with the result "{}"'.format(email, result)
             mp.active_children()
 
     def _send_email_with_response(self, result, email):
+        if not email:
+            print "No email provided. The result is '{}'".format(result)
+            return
+        print 'Sending mail to {} with the result "{}"'.format(email, result)
+
         server, me, password = self.mail_config['server'], self.mail_config['username'], self.mail_config['password']
         msg = MIMEText(result)
         msg['Subject'] = 'Your task has finished'

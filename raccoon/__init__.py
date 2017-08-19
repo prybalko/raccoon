@@ -22,7 +22,7 @@ tasks_instances = map(lambda x: x.get_instances(), [task, BaseTask])
 TASKS = {task.name: task for task in chain(*tasks_instances)}
 TASK_QUEUES = {task_name: Queue() for task_name in TASKS.keys()}
 
-print TASKS
+print "Found {} tasks: {}".format(len(TASKS), TASKS.keys())
 
 import views
 

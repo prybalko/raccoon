@@ -23,7 +23,7 @@ REQUEST_SCHEMA = {
                 "type": "string"
             }
         },
-    "required": ["type", "params", "email"]
+    "required": ["type", "params"]
 }
 
 
@@ -56,7 +56,6 @@ def submit_new_task(raw_data):
         data = validate_request_data(raw_data)
     except ValueError as e:
         return {"status": "ERROR", "error_code": 100, "error_msg": e.message}
-    task_name, params, email = data['type'], data['params'], data['email']
-    task_data = {'params': params, 'email': email}
-    TASK_QUEUES[task_name].put(task_data)
+    task_name, params, email = data['type'], data['params'], data.get('email')
+    TASK_QUEUES[task_name].put({'params': params, 'email': email})
     return response
