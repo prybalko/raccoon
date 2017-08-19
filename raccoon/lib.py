@@ -57,5 +57,6 @@ def submit_new_task(raw_data):
     except ValueError as e:
         return {"status": "ERROR", "error_code": 100, "error_msg": e.message}
     task_name, params, email = data['type'], data['params'], data['email']
-    TASK_QUEUES[task_name].put(params)
+    task_data = {'params': params, 'email': email}
+    TASK_QUEUES[task_name].put(task_data)
     return response

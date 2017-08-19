@@ -1,16 +1,19 @@
 import multiprocessing as mp
+import smtplib
 import time
+from email.mime.text import MIMEText
 
 
 class Broker(object):
-    __slots__ = ('task_queues', 'result_queue', 'tasks')
+    __slots__ = ('task_queues', 'result_queue', 'tasks', 'mail_config')
 
-    def __init__(self, task_queue_list, result_queue, tasks):
-        self.task_queues = task_queue_list
+    def __init__(self, task_queues, result_queue, tasks, mail_config):
+        self.task_queues = task_queues
         self.result_queue = result_queue
         self.tasks = tasks
+        self.mail_config = mail_config
 
-    def __call__(self, *args, **kwargs):
+    def __call__(self):
         self.run()
 
     def run(self):
@@ -24,11 +27,26 @@ class Broker(object):
         for task_name, task_queue in self.task_queues.items():
             if not task_queue.empty():
                 task = self.tasks[task_name]
-                kwargs = task_queue.get()
-                mp.Process(target=task._run, kwargs=kwargs).start()
+                task_data = task_queue.get()
+                mp.Process(target=task._run, kwargs=task_data).start()
 
     def _proceed_result_if_any(self):
         if not self.result_queue.empty():
-            msg = self.result_queue.get()
-            print msg
+            response = self.result_queue.get()
+            self._send_email_with_response(**response)
+            result, email = response['result'], response['email']
+            print 'Sending mail to {} with the result "{}"'.format(email, result)
             mp.active_children()
+
+    def _send_email_with_response(self, result, email):
+        server, me, password = self.mail_config['server'], self.mail_config['username'], self.mail_config['password']
+        msg = MIMEText(result)
+        msg['Subject'] = 'Your task has finished'
+        msg['From'] = me
+        msg['To'] = email
+
+        s = smtplib.SMTP_SSL(server)
+        s.ehlo()
+        s.login(me, password)
+        s.sendmail(me, email, msg.as_string())
+        s.quit()

@@ -4,6 +4,8 @@ from multiprocessing import Queue, Process
 
 from flask import Flask
 
+from config import MAIL_USERNAME, MAIL_PASSWORD, MAIL_SERVER
+
 RESULTS_QUEUE = Queue()
 
 from raccoon.brokers import Broker
@@ -24,5 +26,6 @@ print TASKS
 
 import views
 
-broker = Broker(task_queue_list=TASK_QUEUES, result_queue=RESULTS_QUEUE, tasks=TASKS)
+mail_config = dict(username=MAIL_USERNAME, password=MAIL_PASSWORD, server=MAIL_SERVER)
+broker = Broker(task_queues=TASK_QUEUES, result_queue=RESULTS_QUEUE, tasks=TASKS, mail_config=mail_config)
 Process(target=broker).start()
