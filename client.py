@@ -13,7 +13,7 @@ task_schema = {
 
 @task(name='make_report', json_schema=task_schema)
 def make_report(num):
-    time.sleep(2)
+    time.sleep(num)
     return "CALLING make_report function with arg {}".format(num)
 
 
@@ -22,5 +22,5 @@ class MakeReport(BaseTask):
     json_schema = task_schema
 
     def run(self, num):
-        time.sleep(3)
+        time.sleep(num)
         return "Calling MakeReport class run method with arg {}".format(num)

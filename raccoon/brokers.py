@@ -1,17 +1,21 @@
 import multiprocessing as mp
 import smtplib
 import time
+from datetime import datetime
 from email.mime.text import MIMEText
+
+from raccoon.models import Job
 
 
 class Broker(object):
-    __slots__ = ('task_queues', 'result_queue', 'tasks', 'mail_config')
+    __slots__ = ('task_queues', 'result_queue', 'tasks', 'mail_config', 'session')
 
-    def __init__(self, task_queues, result_queue, tasks, mail_config):
+    def __init__(self, task_queues, result_queue, tasks, mail_config, session):
         self.task_queues = task_queues
         self.result_queue = result_queue
         self.tasks = tasks
         self.mail_config = mail_config
+        self.session = session
 
     def __call__(self):
         self.run()
@@ -28,15 +32,26 @@ class Broker(object):
             if not task_queue.empty():
                 task = self.tasks[task_name]
                 task_data = task_queue.get()
+                self._set_job_status(task_data['job_id'], 'in progress')
                 mp.Process(target=task._run, kwargs=task_data).start()
 
     def _proceed_result_if_any(self):
         if not self.result_queue.empty():
             response = self.result_queue.get()
+            self._set_job_status(response['job_id'], 'success')
             self._send_email_with_response(**response)
             mp.active_children()
 
-    def _send_email_with_response(self, result, email):
+    def _set_job_status(self, job_id, status):
+        job = Job.query.get(job_id)
+        job.status = status
+        if status in ['success', 'fail']:
+            job.end_date = datetime.now()
+        elif status == 'in progress':
+            job.start_date = datetime.now()
+        self.session.commit()
+
+    def _send_email_with_response(self, result, email, **kwargs):
         if not email:
             print "No email provided. The result is '{}'".format(result)
             return

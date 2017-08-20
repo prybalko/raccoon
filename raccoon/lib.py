@@ -2,7 +2,8 @@ import json
 
 from jsonschema import validate, ValidationError
 
-from raccoon import TASK_QUEUES, TASKS
+from raccoon import TASK_QUEUES, TASKS, db
+from raccoon.models import Job
 
 REQUEST_SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",
@@ -50,12 +51,17 @@ def validate_request_data(raw_data):
     return data
 
 
-def submit_new_task(raw_data):
+def submit_new_job(raw_data):
     response = {"status": "OK"}
     try:
         data = validate_request_data(raw_data)
     except ValueError as e:
         return {"status": "ERROR", "error_code": 100, "error_msg": e.message}
     task_name, params, email = data['type'], data['params'], data.get('email')
-    TASK_QUEUES[task_name].put({'params': params, 'email': email})
+
+    job = Job(task_name=task_name, params=json.dumps(params), email=email)
+    db.session.add(job)
+    db.session.commit()
+
+    TASK_QUEUES[task_name].put({'params': params, 'email': email, 'job_id': job.id})
     return response

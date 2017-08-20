@@ -24,9 +24,9 @@ class task(AbstractTask):
         self.results_queue = RESULTS_QUEUE
 
     def __call__(self, fn):
-        def call_fn(params, email):
+        def call_fn(params, email, job_id):
             result = fn(**params)
-            self.results_queue.put({'result': result, 'email': email})
+            self.results_queue.put({'result': result, 'email': email, 'job_id': job_id})
         self.wrapper = call_fn
 
     def _run(self, *args, **kwargs):
@@ -49,6 +49,6 @@ class BaseTask(AbstractTask):
         for subclass in cls.__subclasses__():
             yield subclass()
 
-    def _run(self, params, email):
+    def _run(self, params, email, job_id):
         result = self.run(**params)
-        self.results_queue.put({'result': result, 'email': email})
+        self.results_queue.put({'result': result, 'email': email, 'job_id': job_id})
