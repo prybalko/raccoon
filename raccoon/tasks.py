@@ -76,3 +76,6 @@ class BaseTask(AbstractTask):
     def _run(self, params, email, job_id):
         result = self.run(**params)
         self.results_queue.put({'result': result, 'email': email, 'job_id': job_id})
+
+    def run(self, **kwargs):
+        raise NotImplementedError
