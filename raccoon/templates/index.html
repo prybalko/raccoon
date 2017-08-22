@@ -28,10 +28,10 @@
                 </thead>
                 <tbody>
                 {% for job in jobs %}
-                    <tr class={% if job.status == 'success' %} success
-                              {% elif job.status == 'fail' %} danger
-                              {% elif job.status == 'in progress' %} warning
-                              {% elif job.status == 'queued' %} active {% endif %}>
+                    <tr class=" {{'success' if job.status == 'success' }}
+                                {{'danger' if job.status == 'fail' }}
+                                {{'warning' if job.status == 'in progress' }}
+                                {{'active' if job.status == 'queued' }}">
                         <td>{{ job.id }}</td>
                         <td>{{ job.task_name }}</td>
                         <td>{{ job.params }}</td>

@@ -13,10 +13,7 @@ def home():
     return render_template('index.html', jobs=jobs)
 
 
-@app.route("/api/tasks/", methods=['GET', 'POST'])
+@app.route("/api/tasks/", methods=['POST'])
 def tasks():
-    if request.method == 'POST':
-        response = submit_new_job(request.data)
-        return json.dumps(response)
-    print Job.query.all()
-    return "list"
+    response = submit_new_job(request.data)
+    return json.dumps(response)

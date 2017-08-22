@@ -1,5 +1,6 @@
 import json
 
+from datetime import datetime
 from jsonschema import validate, ValidationError
 
 from raccoon import TASK_QUEUES, TASKS, db
@@ -59,7 +60,7 @@ def submit_new_job(raw_data):
         return {"status": "ERROR", "error_code": 100, "error_msg": e.message}
     task_name, params, email = data['type'], data['params'], data.get('email')
 
-    job = Job(task_name=task_name, params=json.dumps(params), email=email)
+    job = Job(task_name=task_name, params=json.dumps(params), email=email, submit_date=datetime.now())
     db.session.add(job)
     db.session.commit()
 
