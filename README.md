@@ -58,3 +58,4 @@ Broker is running in a separate process. This way Flask never gets blocked and c
 * add tests
 * make it start like `raccoon <user_tasks_file> [--<limits>]`
 * make the dashboard get updates automatically
+* add a possibility to attach files to sent messages
