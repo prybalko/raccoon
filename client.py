@@ -1,5 +1,6 @@
-from raccoon import task, BaseTask
 import time
+
+from raccoon import task, BaseTask
 
 task_schema = {
     "type": "object",

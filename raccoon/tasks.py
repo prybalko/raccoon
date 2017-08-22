@@ -4,16 +4,29 @@ from raccoon import RESULTS_QUEUE
 
 
 class AbstractTask(object):
+    """
+    An abstract class for any client tasks. It defines the methods, which `Broker` relies on.
+    """
 
     @classmethod
     def get_instances(cls):
+        """Returns a *list* of task instances. Must be reimplemented"""
         raise NotImplementedError
 
     def _run(self, *args, **kwargs):
+        """This method is called by `Broker` in order to execute the task. Must be reimplemented"""
         raise NotImplementedError
 
 
 class task(AbstractTask):
+    """
+    A decorator to define a task. Example:
+
+    @task(name='make_report', json_schema={...})
+    def make_report(params):
+        pass
+
+    """
     __slots__ = ('name', 'wrapper', 'results_queue', 'json_schema')
     __refs__ = defaultdict(list)
 
@@ -39,6 +52,17 @@ class task(AbstractTask):
 
 
 class BaseTask(AbstractTask):
+    """
+    A superclass to define a task. Example:
+
+    class MakeReport(BaseTask):
+        name = 'make_report'
+        json_schema = {...}
+
+        def run(self, params):
+            pass
+
+    """
     __slots__ = ('results_queue',)
 
     def __init__(self, *args, **kwargs):

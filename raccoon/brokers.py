@@ -28,12 +28,12 @@ class Broker(object):
         print "Broker is running..."
         while True:
             # ToDo: Maybe run it in threads.
-            self._cleanup_processes()
-            self._maybe_start_new_worker()
-            self._proceed_result_if_any()
+            self._cleanup_finished_jobs()
+            self._maybe_start_new_job()
+            self._process_results_if_any()
             time.sleep(0.01)
 
-    def _maybe_start_new_worker(self):
+    def _maybe_start_new_job(self):
         total_running = len(list(chain(*self._jobs.values())))
         if total_running >= self.jobs_limit['total']:
             return
@@ -43,18 +43,17 @@ class Broker(object):
                 if len(self._jobs[task_name]) < self.jobs_limit[task_name] and total_running < self.jobs_limit['total']:
                     task = self.tasks[task_name]
                     task_data = task_queue.get()
-                    self._set_job_status(task_data['job_id'], 'in progress')
-
                     process = mp.Process(target=task._run, kwargs=task_data)
                     process.start()
                     self._jobs[task_name].append(process)
+                    self._set_job_status(task_data['job_id'], 'in progress')
 
-    def _proceed_result_if_any(self):
+    def _process_results_if_any(self):
         if not self.result_queue.empty():
             response = self.result_queue.get()
             self._send_email_with_response(**response)
 
-    def _cleanup_processes(self):
+    def _cleanup_finished_jobs(self):
         for task_name, jobs in self._jobs.iteritems():
             for job in list(jobs):
                 if not job.is_alive():

@@ -1,6 +1,6 @@
 import json
-
 from datetime import datetime
+
 from jsonschema import validate, ValidationError
 
 from raccoon import TASK_QUEUES, TASKS, db
